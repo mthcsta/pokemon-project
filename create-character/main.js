@@ -72,7 +72,9 @@ form.onsubmit = function(e){
         i++;
     }
 
-    updateFrame();
+    if(debugIncrement.checked == true)
+        updateFrame();
+        
     updateCharData();
 }
 
@@ -163,11 +165,18 @@ debugBorder.checked = true;
 var debugBorderMessage = document.createElement('span');
 debugBorderMessage.innerHTML = 'Borda Auxiliar Visual'
 
+var debugIncrement = document.createElement('input');
+debugIncrement.type = "checkbox";
+debugIncrement.checked = true;
+
+var debugIncrementMessage = document.createElement('span');
+debugIncrementMessage.innerHTML = 'Auto Incrementar Frame'
+
 
 debugBorder.onchange=w.onchange=h.onchange=xL.onchange=yL.onchange=xR.onchange=yR.onchange=draw;
 w.onkeyup=h.onkeyup=xL.onkeyup=yL.onkeyup=xR.onkeyup=yR.onkeyup=draw;
 
-
+var BREAKLINE = document.createElement('br');
 
 var divAnimation = document.createElement('div');
 divAnimation.appendChild(animation);
@@ -195,8 +204,18 @@ var divDebug = document.createElement('div');
 divDebug.className = 'debug';
 divDebug.appendChild(debugBorder);
 divDebug.appendChild(debugBorderMessage);
+divDebug.appendChild(BREAKLINE);
+divDebug.appendChild(debugIncrement);
+divDebug.appendChild(debugIncrementMessage);
 
 var divJSON = document.createElement('div');
+divJSON.onclick = function(e){
+    var range = document.createRange();
+    range.selectNode(e.currentTarget);
+    window.getSelection().removeAllRanges();
+    window.getSelection().addRange(range);
+    document.execCommand('copy')
+}
 
 form.appendChild(divAnimation);
 form.appendChild(divSize);
