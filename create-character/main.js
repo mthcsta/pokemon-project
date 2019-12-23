@@ -6,13 +6,14 @@ function $_GET(key){
     return (new URL(location.href)).searchParams.get(key);
 }
 
+var src = $_GET('src');
 
-if($_GET('src')==null){
+if(src==null){
     document.write('Imagem Inexistente. Insira uma imagem na pasta <b>chars</b>, e entre com o nome e extensão dela na url: <b>?src=nome.extensao</b>');
     return;
 }
 
-
+var BORDER_SIZE = 1;
 var SPACE = 10;
 var character = {};
 var animationList = ['stand', 'walking', 'run', 'swing', 'vehicle'];
@@ -23,7 +24,7 @@ imageBody.style.margin = 'auto';
 imageBody.style.position = 'relative';
 
 var image = document.createElement("img");
-image.src = "chars/" + $_GET('src');
+image.src = "chars/" + src;
 image.style.opacity = 0.1;
 image.style.display = 'block';
 image.style.margin = 'auto';
@@ -228,12 +229,9 @@ function draw(){
 
     var dataValues = [xL.value, yL.value, w.value, h.value, xR.value, yR.value, w.value, h.value]; 
 
-    console.log(dataValues);
-
-    canvas.style.left = parseInt(xL.value) - (debugBorder.checked?1:0) + "px";
-    canvas.style.top = parseInt(yL.value) - (debugBorder.checked?1:0) + "px";
-    canvas.style.border = debugBorder.checked ? "1px dotted mediumseagreen" : "none";
-
+    canvas.style.left = parseInt(xL.value) - (debugBorder.checked?BORDER_SIZE:0) + "px";
+    canvas.style.top = parseInt(yL.value) - (debugBorder.checked?BORDER_SIZE:0) + "px";
+    canvas.style.border = debugBorder.checked ? BORDER_SIZE + "px dotted mediumseagreen" : "none";
     canvas.width = w.value;
     canvas.height = h.value;
 
@@ -251,12 +249,15 @@ function draw(){
 
 }
 
-function updateCharData(){
+function updateCharData(changed=1){
     var characterJSON = document.createElement('pre');
     characterJSON.innerHTML = JSON.stringify(character, undefined, 1)
                                 .replace(/("[a-z].+")/ig,"<b>$1</b>");
     divJSON.innerHTML = '';
     divJSON.appendChild(characterJSON);
+    if(changed && localStorage){
+        localStorage.setItem(src, JSON.stringify(character));
+    }
 }
 function updateFrame(){
     frame.value = parseInt(frame.value) + 1;
@@ -266,5 +267,12 @@ function updateFrame(){
 
 
 document.addEventListener("DOMContentLoaded", draw);
+
+if(localStorage){
+    if(localStorage.getItem(src)!=null){
+        character = JSON.parse(localStorage.getItem(src));
+        updateCharData(0);
+    }
+}
 
 })();
