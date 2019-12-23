@@ -1,0 +1,34 @@
+*{
+    font-family: 'Courier New', Courier, monospace;
+}
+.submit{
+    border:none;
+    padding: 0.5em 1em;
+    width:50%;
+}
+.save{
+    background-color: yellowgreen;
+    color: darkgreen;
+}
+.compare{
+    background-color: mediumorchid;
+    color:darkslateblue;
+}
+
+pre{
+    font-size: 0.5em;
+    background: honeydew;
+    color: darkcyan;
+    padding: 1em;
+}
+pre>b{
+    color: seagreen;
+}
+input:not([type='checkbox']){
+    width: 50%;
+    box-sizing: border-box;
+}
+.debug{
+    padding: 5px;
+    color: cadetblue;
+}
