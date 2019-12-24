@@ -3,18 +3,22 @@
 }
 .submit{
     border:none;
-    padding: 0.5em 1em;
-    width:50%;
+    padding: 0.5em 0em;
+    width:25%;
 }
 .save{
     background-color: yellowgreen;
     color: darkgreen;
+    width:50%;
 }
 .compare{
     background-color: mediumorchid;
     color:darkslateblue;
 }
-
+.delete{
+    background: crimson;
+    color: brown;
+}
 pre{
     font-size: 0.5em;
     background: honeydew;

@@ -13,6 +13,7 @@ if(src==null){
     return;
 }
 
+var BREAKLINE = document.createElement('br');
 var BORDER_SIZE = 1;
 var SPACE = 10;
 var character = {};
@@ -34,7 +35,7 @@ imageBody.appendChild(image);
 
 document.body.appendChild(imageBody);
 
-image.onload = function(){ 
+image.onload = function(){
     imageBody.style.width = image.width + 'px'; 
     imageBody.style.height = image.height + SPACE + 'px';
 }
@@ -74,7 +75,7 @@ form.onsubmit = function(e){
 
     if(debugIncrement.checked == true)
         updateFrame();
-        
+
     updateCharData();
 }
 
@@ -87,6 +88,10 @@ for(var moveName of animationList){
     move.innerHTML = moveName;
     animation.appendChild(move);
 }
+animation.onchange = function(){
+    direction.value = 0;
+    frame.value = 0;
+}
 
 var direction = document.createElement('input'); 
 direction.type = 'number';
@@ -96,6 +101,10 @@ direction.placeholder = 'Direção';
 direction.style.width = '25%';
 direction.min = 0;
 direction.max = 3;
+direction.onchange = direction.onkeyup = function(){
+    var AnimationDirectionFrame;
+    frame.value = (AnimationDirectionFrame=character[animation.value][direction.value]) && AnimationDirectionFrame.length || 0;
+}
 
 var frame = document.createElement('input');
 frame.type = 'number';
@@ -104,43 +113,41 @@ frame.value = '0';
 frame.placeholder = 'Frame';
 frame.style.width = '25%';
 frame.min = 0;
-
+frame.onchange = frame.onkeyup = function(e){
+    var AnimationDirectionFrame;
+    var frameLength = (AnimationDirectionFrame=character[animation.value][direction.value]) && AnimationDirectionFrame.length || 0;
+    console.log(frame.value, frameLength);
+    if(parseInt(frame.value) > frameLength){
+        e.preventDefault();
+        frame.value = frameLength;
+        return;
+    }    
+}
 
 var w = document.createElement('input');
 w.type = 'number';
 w.name = 'width';
-w.placeholder = 'Width';
+w.placeholder = 'Largura';
 w.value = 42;
 
 var h = document.createElement('input');
 h.type = 'number';
 h.name = 'height';
-h.placeholder = 'Height';
+h.placeholder = 'Altura';
 h.value = 46;
 
-var xL = document.createElement('input');
-xL.type = 'number';
-xL.name = 'x_left';
-xL.placeholder = 'x-left';
-xL.value = 8;
+var x = document.createElement('input');
+x.type = 'number';
+x.name = 'X';
+x.placeholder = 'Posição X';
+x.value = 8;
 
-var xR = document.createElement('input');
-xR.type = 'number';
-xR.name = 'x_right';
-xR.placeholder = 'x-right';
-xR.value = 0;
+var y = document.createElement('input');
+y.type = 'number';
+y.name = 'Y';
+y.placeholder = 'Posição Y';
+y.value = 14;
 
-var yL = document.createElement('input');
-yL.type = 'number';
-yL.name = 'y_left';
-yL.placeholder = 'y-left';
-yL.value = 14;
-
-var yR = document.createElement('input');
-yR.type = 'number';
-yR.name = 'y_right';
-yR.placeholder = 'y-right';
-yR.value = 0;
 
 var submitSave = document.createElement('button');
 submitSave.innerHTML = 'Salvar Frame';
@@ -155,6 +162,20 @@ submitCompare.onclick = function(e){
         canvas.style.display = 'block';
     }else{
         canvas.style.display = 'none';
+    }
+}
+
+var submitDelete = document.createElement('button');
+submitDelete.innerHTML = 'Deletar';
+submitDelete.className = 'submit delete';
+submitDelete.onclick = function(e){
+    e.preventDefault();
+    if(confirm(`Você está prestes a excluir um frame, deseja continuar?
+ ************************************************
+   Animação: ${animation.value}\n   Direção: ${direction.value}\n   Frame: ${frame.value}`)
+     ){
+        character[animation.value][direction.value].splice(frame.value, 1);
+        updateCharData();        
     }
 }
 
@@ -173,10 +194,9 @@ var debugIncrementMessage = document.createElement('span');
 debugIncrementMessage.innerHTML = 'Auto Incrementar Frame'
 
 
-debugBorder.onchange=w.onchange=h.onchange=xL.onchange=yL.onchange=xR.onchange=yR.onchange=draw;
-w.onkeyup=h.onkeyup=xL.onkeyup=yL.onkeyup=xR.onkeyup=yR.onkeyup=draw;
+debugBorder.onchange=w.onchange=h.onchange=x.onchange=y.onchange=draw;
+w.onkeyup=h.onkeyup=x.onkeyup=y.onkeyup=draw;
 
-var BREAKLINE = document.createElement('br');
 
 var divAnimation = document.createElement('div');
 divAnimation.appendChild(animation);
@@ -188,17 +208,14 @@ var divSize = document.createElement('div');
 divSize.appendChild(w);
 divSize.appendChild(h);
 
-var divLeft = document.createElement('div');
-divLeft.appendChild(xL);
-divLeft.appendChild(yL);
-
-var divRight = document.createElement('div');
-divRight.appendChild(xR);
-divRight.appendChild(yR);
+var divPosition = document.createElement('div');
+divPosition.appendChild(x);
+divPosition.appendChild(y);
 
 var divSubmit = document.createElement('div');
 divSubmit.appendChild(submitSave);
 divSubmit.appendChild(submitCompare);
+divSubmit.appendChild(submitDelete);
 
 var divDebug = document.createElement('div');
 divDebug.className = 'debug';
@@ -219,8 +236,7 @@ divJSON.onclick = function(e){
 
 form.appendChild(divAnimation);
 form.appendChild(divSize);
-form.appendChild(divLeft);
-form.appendChild(divRight);
+form.appendChild(divPosition);
 form.appendChild(divSubmit);
 form.appendChild(divDebug);
 form.appendChild(divJSON);
@@ -246,10 +262,10 @@ function draw(){
 
     console.log("called...");
 
-    var dataValues = [xL.value, yL.value, w.value, h.value, xR.value, yR.value, w.value, h.value]; 
+    var dataValues = [x.value, y.value, w.value, h.value, 0, 0, w.value, h.value]; 
 
-    canvas.style.left = parseInt(xL.value) - (debugBorder.checked?BORDER_SIZE:0) + "px";
-    canvas.style.top = parseInt(yL.value) - (debugBorder.checked?BORDER_SIZE:0) + "px";
+    canvas.style.left = parseInt(x.value) - (debugBorder.checked?BORDER_SIZE:0) + "px";
+    canvas.style.top = parseInt(y.value) - (debugBorder.checked?BORDER_SIZE:0) + "px";
     canvas.style.border = debugBorder.checked ? BORDER_SIZE + "px dotted mediumseagreen" : "none";
     canvas.width = w.value;
     canvas.height = h.value;
@@ -281,7 +297,6 @@ function updateCharData(changed=1){
 function updateFrame(){
     frame.value = parseInt(frame.value) + 1;
 }
-
 
 
 
