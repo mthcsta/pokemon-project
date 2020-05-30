@@ -176,7 +176,7 @@
     element.addEventListener('keyup', draw);
   });
   
-  divJSON.addEventListener('click', function() {
+  divJSON.addEventListener('click', function(e) {
     const range = document.createRange();
     range.selectNode(e.currentTarget);
     window.getSelection().removeAllRanges();
