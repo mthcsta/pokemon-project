@@ -1,14 +1,68 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Pokemon Avatar Creator</title>
 </head>
 <body>
+    <link rel="stylesheet" href="main.css">
+
+    <div id="view-sprite">
+        <img id="sprite-image">
+        <canvas id="sprite-canvas"></canvas>
+    </div>
+    <form id="form">
+        <div id="form-data">
+            <div>
+                <div id="animation-working">
+                    <canvas id="animation-direction-frames"></canvas>
+                </div>
+            </div>
+            <div>
+                <div>
+                    <select name="animation" id="animation">
+                        <option>stand</option>
+                        <option>walking</option>
+                        <option>run</option>
+                        <option>swing</option>
+                        <option>vehicle</option>
+                    </select><select name="direction" id="direction" title="direção do personagem durante a animação" style="width:25%;">
+                        <option>front</option>
+                        <option>left</option>
+                        <option>right</option>
+                        <option>back</option>
+                    </select><input type="number" id="frame" name="frame" placeholder="Frame" min="0" style="width: 25%;" value="0">
+                </div>
+                <div>
+                    <input type="number" name="width" id="width" placeholder="Largura" value="42"><input type="number" name="height" id="height" placeholder="Altura" value="46">
+                </div>
+                <div>
+                    <input type="number" name="x" id="x" placeholder="Posição X" value="8"><input type="number" name="y" id="y" placeholder="Posição Y" value="14">
+                </div>
+                <div>
+                    <button class="submit save" id="submit-save">Salvar Frame</button><button class="submit delete" id="submit-delete">Deletar</button>
+                </div>                
+            </div>
+        </div>
+        <div class="debug">
+            <div>
+                <input type="checkbox" checked id="debug-border">
+                <label for="debug-border">Borda Auxiliar Visual</label>
+            </div>
+            <div>
+                <input type="checkbox" checked id="auto-increment">
+                <label for="auto-increment">Auto Incrementar Frame</label>
+            </div>
+        </div>
+        <div id="div-JSON">
+            <pre id="pre"></pre>
+        </div>
+    </form>
+
     <script src="functions.js"></script>
-    <script src="main.js"></script>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <script src="script.js"></script>
+
 </body>
 </html>

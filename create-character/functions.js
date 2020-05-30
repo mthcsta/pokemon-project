@@ -1,7 +1,8 @@
+
 /**
  * 
  */
-function $_GET(key) {
+function getParam(key) {
     return (new URL(location.href)).searchParams.get(key);
 }
 
@@ -88,3 +89,28 @@ function updateFrame() {
     frame.value = parseInt(frame.value) + 1;
 }
 
+
+function searchSelectionEmpty(image, width, height, x, y) {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    canvas.width = image.offsetWidth;
+    canvas.height = image.offsetHeight;
+
+    context.drawImage(image, 0, 0);
+
+    const borderTop = !!context.getImageData(x, y-1, width, 1).data.filter(Boolean).length || !context.getImageData(x, y, width, 1).data.filter(Boolean).length;
+    const borderLeft = !!context.getImageData(x-1, y, 1, height).data.filter(Boolean).length || !context.getImageData(x, y, 1, height).data.filter(Boolean).length;
+    const borderRight = !!context.getImageData(x+width, y, 1, height).data.filter(Boolean).length || !context.getImageData(x+width-1, y, 1, height).data.filter(Boolean).length;
+    const borderBottom = !!context.getImageData(x, height+y, width, 1).data.filter(Boolean).length || !context.getImageData(x, height+y-1, width, 1).data.filter(Boolean).length;
+    
+    return { borderTop, borderRight, borderBottom, borderLeft };
+}
+
+
+function getLastFormData(source) {
+    return JSON.parse(localStorage.getItem(source + '-lastFormData'));
+}
+function setLastFormData(source, formData) {
+    return localStorage.setItem(source + '-lastFormData', JSON.stringify(formData));
+}

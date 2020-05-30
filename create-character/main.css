@@ -1,0 +1,103 @@
+#view-sprite{
+    margin: auto;
+    position: relative;
+    width: 0px;
+    height: 0px;
+    padding-bottom: 2rem;
+}
+#sprite-image{
+    opacity: 0.5;
+    display: block;
+    margin: auto;
+    position: absolute;
+}
+
+#sprite-canvas{
+    background-color: transparent;
+    margin: auto;
+    display: block;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+}
+#sprite-canvas.border{
+    border: 1px dotted mediumseagreen;
+}
+
+form{
+    display: flex;
+    flex-direction: column;
+    width: 445px;
+    margin: auto;
+}
+
+#form-data{
+    display: flex;
+    justify-content: center;
+}
+
+#animation-working{
+    background-color: darkgreen;
+    width: 100px;
+    height: 91px;
+    display:grid; 
+    justify-content: center;
+    align-items: center;
+}
+
+select {
+    width: 50%; 
+    background-color: white; 
+    border: 0.5px solid darkgrey; 
+    box-sizing: border-box; 
+    height: 21px;
+}
+
+
+
+
+
+
+*{
+    font-family: 'Courier New', Courier, monospace;
+}
+.submit{
+    border:none;
+    padding: 0.5em 0em;
+    width:25%;
+}
+.save{
+    background-color: yellowgreen;
+    color: darkgreen;
+    width:75%;
+}
+.compare{
+    background-color: mediumorchid;
+    color:darkslateblue;
+}
+.delete{
+    background: crimson;
+    color: brown;
+}
+pre{
+    font-size: 0.5em;
+    background: honeydew;
+    color: darkcyan;
+    padding: 1em;
+}
+pre>b{
+    color: seagreen;
+}
+input:not([type='checkbox']){
+    width: 50%;
+    box-sizing: border-box;
+}
+.debug{
+    padding: 5px;
+    color: cadetblue;
+}
+
+pre{
+    max-height: 400px;
+    overflow: auto;
+}
