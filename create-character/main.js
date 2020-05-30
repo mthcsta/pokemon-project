@@ -1,278 +1,273 @@
 "use strict";
-(function(){
+(function() {
 
 // Auxiliares:
-function $_GET(key){
-    return (new URL(location.href)).searchParams.get(key);
-}
 
-var src = $_GET('src');
+const src = $_GET('src');
 
-if(src==null){
+if (src == null) {
     document.write('Imagem Inexistente. Insira uma imagem na pasta <b>chars</b>, e entre com o nome e extensão dela na url: <b>?src=nome.extensao</b>');
     return;
 }
 
-var BREAKLINE = document.createElement('br');
-var BORDER_SIZE = 1;
-var SPACE = 10;
-var character = {};
-var animationList = ['stand', 'walking', 'run', 'swing', 'vehicle'];
+const character = JSON.parse(localStorage.getItem(src)) || {};
+const animationList = ['stand', 'walking', 'run', 'swing', 'vehicle'];
+const directionList = ['front', 'left', 'right', 'back'];
+
+const BORDER_SIZE = 1;
+const SPACE = 10;
+const BREAKLINE = createElement('br');
 
 
-var imageBody = document.createElement('div');
-imageBody.style.margin = 'auto'; 
-imageBody.style.position = 'relative';
-
-var image = document.createElement("img");
-image.src = "chars/" + src;
-image.style.opacity = 0.1;
-image.style.display = 'block';
-image.style.margin = 'auto';
-image.style.position = 'absolute';
-
-imageBody.appendChild(image);
-
-document.body.appendChild(imageBody);
-
-image.onload = function(){
-    imageBody.style.width = image.width + 'px'; 
-    imageBody.style.height = image.height + SPACE + 'px';
-}
-
-var form = document.createElement('form');
-form.style.margin = 'auto';
-form.style.display = 'table';
-form.onsubmit = function(e){
-    e.preventDefault();
-    var data = {};
-    for(var element of e.srcElement){
-        data[element.name] = element.value;
+const imageBody = createElement('div', {
+    addStyle: {
+        margin:'auto',
+        position: 'relative',    
     }
-    var i=0;
-    var animation = data.animation;
-    var direction = data.direction;
-    var frame = data.frame;
+});
 
-    if(typeof character[animation]=="undefined")
-        character[animation] = [];
-
-    if(typeof character[animation][direction] == "undefined")
-        character[animation][direction] = [];
-
-    delete data.animation;
-    delete data.direction;
-    delete data.frame;
-    delete data[""];
-
-    
-    character[animation][direction][frame] = [];
-
-    for(var element in data){
-        character[animation][direction][frame][i] = data[element];
-        i++;
+const image = createElement('img', {
+    src: 'chars/' + src,
+    onload() {
+        addStyle(imageBody, {
+            width: image.width + 'px',
+            height: image.height + SPACE + 'px',
+        });
+    },
+    addStyle: {
+        opacity: 0.5,
+        display: 'block',
+        margin: 'auto',
+        position: 'absolute',        
     }
+});
 
-    if(debugIncrement.checked == true)
-        updateFrame();
-
-    updateCharData();
-}
-
-
-var animation = document.createElement('select');
-animation.name = 'animation';
-animation.style.width = '50%';
-for(var moveName of animationList){
-    var move = document.createElement('option');
-    move.innerHTML = moveName;
-    animation.appendChild(move);
-}
-animation.onchange = function(){
-    direction.value = 0;
-    frame.value = 0;
-}
-
-var direction = document.createElement('input'); 
-direction.type = 'number';
-direction.name = 'direction';
-direction.value = '0';
-direction.placeholder = 'Direção';
-direction.style.width = '25%';
-direction.min = 0;
-direction.max = 3;
-direction.onchange = direction.onkeyup = function(){
-    var AnimationDirectionFrame;
-    frame.value = (AnimationDirectionFrame=character[animation.value][direction.value]) && AnimationDirectionFrame.length || 0;
-}
-
-var frame = document.createElement('input');
-frame.type = 'number';
-frame.name = 'frame';
-frame.value = '0';
-frame.placeholder = 'Frame';
-frame.style.width = '25%';
-frame.min = 0;
-frame.onchange = frame.onkeyup = function(e){
-    var AnimationDirectionFrame;
-    var frameLength = (AnimationDirectionFrame=character[animation.value][direction.value]) && AnimationDirectionFrame.length || 0;
-    console.log(frame.value, frameLength);
-    if(parseInt(frame.value) > frameLength){
+const form = createElement('form', {
+    onsubmit(e) {
         e.preventDefault();
-        frame.value = frameLength;
-        return;
-    }    
-}
 
-var w = document.createElement('input');
-w.type = 'number';
-w.name = 'width';
-w.placeholder = 'Largura';
-w.value = 42;
+        const data = [...e.srcElement].reduce((list, element) => {
+            if (element.hasAttribute('name')) {
+                return {...list, [element.name]: element.value};
+            }
+            return list;
+        }, {}); 
 
-var h = document.createElement('input');
-h.type = 'number';
-h.name = 'height';
-h.placeholder = 'Altura';
-h.value = 46;
+        {
+            const { animation, direction, frame } = data;
+        
+            if (typeof character[animation] == "undefined")
+                character[animation] = {};
+        
+            if (typeof character[animation][direction] == "undefined")
+                character[animation][direction] = [];
 
-var x = document.createElement('input');
-x.type = 'number';
-x.name = 'X';
-x.placeholder = 'Posição X';
-x.value = 8;
+            character[animation][direction][frame] = [
+                data.width, 
+                data.height, 
+                data.X, 
+                data.Y
+            ];
+        }
 
-var y = document.createElement('input');
-y.type = 'number';
-y.name = 'Y';
-y.placeholder = 'Posição Y';
-y.value = 14;
-
-
-var submitSave = document.createElement('button');
-submitSave.innerHTML = 'Salvar Frame';
-submitSave.className = 'submit save';
-
-var submitCompare = document.createElement('button');
-submitCompare.innerHTML = 'Comparar';
-submitCompare.className = 'submit compare';
-submitCompare.onclick = function(e){
-    e.preventDefault();
-    if(canvas.style.display == 'none'){
-        canvas.style.display = 'block';
-    }else{
-        canvas.style.display = 'none';
+        if(debugIncrement.checked == true)
+            frame.value = parseInt(frame.value) + 1;
+    
+        divJSON.innerHTML = updateCharData(character, src);
+    },
+    addStyle: {
+        margin: 'auto',
+        display: 'table',    
     }
-}
+});
 
-var submitDelete = document.createElement('button');
-submitDelete.innerHTML = 'Deletar';
-submitDelete.className = 'submit delete';
-submitDelete.onclick = function(e){
-    e.preventDefault();
-    if(confirm(`Você está prestes a excluir um frame, deseja continuar?
- ************************************************
-   Animação: ${animation.value}\n   Direção: ${direction.value}\n   Frame: ${frame.value}`)
-     ){
-        character[animation.value][direction.value].splice(frame.value, 1);
-        updateCharData();        
+const animation = createElement('select', {
+    name: 'animation',
+    onchange() {
+        direction.selectedIndex = 0;
+        frame.value = 0;    
+    },
+    addStyle: {
+        width: '50%',
+        backgroundColor: 'white',
+        border: '0.5px solid darkgrey',
+        boxSizing: 'border-box',
+        height: '21px',    
+    },
+    append: animationList.map((animation) => {
+            return createElement('option', { innerHTML: animation });
+    }), 
+});
+
+const direction = createElement('select', {
+    name: 'direction',
+    title: 'direção do personagem durante a animação',
+    onchange() {
+        frame.value = directionFrameSize(character, animation.value, direction.value);
+    }, 
+    addStyle: {
+        width: '25%',
+        backgroundColor: 'white',
+        border: '0.5px solid darkgrey',
+        boxSizing: 'border-box',
+        height: '21px',    
+    }, 
+    append: directionList.map((directionName) => {
+            return createElement('option', { innerHTML: directionName });
+    }),
+});
+
+const frame = createElement('input', {
+    type: 'number',
+    name: 'frame',
+    placeholder: 'Frame',
+    value: 0,
+    min: 0,
+    check() {
+        const frameLength = directionFrameSize(character, animation.value, direction.value);
+        if (parseInt(frame.value) > frameLength) {
+            frame.value = frameLength;
+            return;
+        }    
+    },
+    onchange() { return this.check(); },
+    onkeyup() { return this.check(); },
+    addStyle: { 
+        width: '25%',
+    },
+});
+
+const w = createElement('input', {
+    type: 'number',
+    name: 'width',
+    placeholder: 'Largura',
+    value: 42,
+});
+const h = createElement('input', {
+    type: 'number',
+    name: 'height',
+    placeholder: 'Altura',
+    value: 46, 
+});
+
+const x = createElement('input', {
+    type: 'number',
+    name: 'X',
+    placeholder: 'Posição X',
+    value: 8,
+});
+const y = createElement('input', {
+    type: 'number',
+    name: 'Y',
+    placeholder: 'Posição Y',
+    value: 14,
+});
+
+const submitSave = createElement('button', {
+    innerHTML: 'Salvar Frame',
+    className: 'submit save',
+});
+
+const submitCompare = createElement('button', {
+    innerHTML: 'Comparar',
+    className: 'submit compare',
+    onclick(e) {
+        e.preventDefault();
+        if (canvas.style.display == 'none') {
+            canvas.style.display = 'block';
+        } else {
+            canvas.style.display = 'none';
+        }
+    },
+});
+const submitDelete = createElement('button', {
+    innerHTML: 'Deletar',
+    className: 'submit delete',
+    onclick(e) {
+        e.preventDefault();
+        if (confirmFrameRemove(animation.value, direction.value, frame.value)) {
+            character[animation.value][direction.value].splice(frame.value, 1);
+            divJSON.innerHTML = updateCharData(character, src);        
+        }
+    },
+});
+
+const debugBorder = createElement('input', {
+    type: 'checkbox',
+    checked: true,
+});
+
+const debugBorderMessage = createElement('span', {
+    innerHTML: 'Borda Auxiliar Visual',
+});
+
+const debugIncrement = createElement('input', {
+    type: 'checkbox',
+    checked: true,
+});
+
+const debugIncrementMessage = createElement('span', {
+    innerHTML: 'Auto Incrementar Frame',
+});
+
+[debugBorder, w, h, x, y].forEach((element) => {
+    element.addEventListener('change', draw);
+    element.addEventListener('keyup', draw);
+});
+
+const divAnimation = createElement('div');
+
+const divSize = createElement('div');
+
+const divPosition = createElement('div');
+
+const divSubmit = createElement('div');
+
+const divDebug = createElement('div',{ className: 'debug', });
+
+const divJSON = createElement('div', {
+    onclick(e) {
+        const range = document.createRange();
+        range.selectNode(e.currentTarget);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy')
     }
-}
-
-var debugBorder = document.createElement('input');
-debugBorder.type = "checkbox";
-debugBorder.checked = true;
-
-var debugBorderMessage = document.createElement('span');
-debugBorderMessage.innerHTML = 'Borda Auxiliar Visual'
-
-var debugIncrement = document.createElement('input');
-debugIncrement.type = "checkbox";
-debugIncrement.checked = true;
-
-var debugIncrementMessage = document.createElement('span');
-debugIncrementMessage.innerHTML = 'Auto Incrementar Frame'
+});
 
 
-debugBorder.onchange=w.onchange=h.onchange=x.onchange=y.onchange=draw;
-w.onkeyup=h.onkeyup=x.onkeyup=y.onkeyup=draw;
+const canvas = createElement('canvas', {
+    width: 700,
+    height: 350,
+    addStyle: {
+        backgroundColor: 'transparent',
+        margin: 'auto',
+        display: 'block',
+        position: 'absolute',    
+    }
+});
 
+const context = canvas.getContext('2d')
 
-var divAnimation = document.createElement('div');
-divAnimation.appendChild(animation);
-divAnimation.appendChild(direction);
-divAnimation.appendChild(frame);
-
-
-var divSize = document.createElement('div');
-divSize.appendChild(w);
-divSize.appendChild(h);
-
-var divPosition = document.createElement('div');
-divPosition.appendChild(x);
-divPosition.appendChild(y);
-
-var divSubmit = document.createElement('div');
-divSubmit.appendChild(submitSave);
-divSubmit.appendChild(submitCompare);
-divSubmit.appendChild(submitDelete);
-
-var divDebug = document.createElement('div');
-divDebug.className = 'debug';
-divDebug.appendChild(debugBorder);
-divDebug.appendChild(debugBorderMessage);
-divDebug.appendChild(BREAKLINE);
-divDebug.appendChild(debugIncrement);
-divDebug.appendChild(debugIncrementMessage);
-
-var divJSON = document.createElement('div');
-divJSON.onclick = function(e){
-    var range = document.createRange();
-    range.selectNode(e.currentTarget);
-    window.getSelection().removeAllRanges();
-    window.getSelection().addRange(range);
-    document.execCommand('copy')
-}
-
-form.appendChild(divAnimation);
-form.appendChild(divSize);
-form.appendChild(divPosition);
-form.appendChild(divSubmit);
-form.appendChild(divDebug);
-form.appendChild(divJSON);
-
-document.body.appendChild(form);
-
-
-
-var canvas = document.createElement("canvas")
-var context = canvas.getContext('2d')
-
-imageBody.appendChild(canvas)
-
-canvas.width = 700;
-canvas.height = 350;
-
-canvas.style.backgroundColor = "transparent"
-canvas.style.margin = "auto"
-canvas.style.display = "block"
-canvas.style.position = "absolute";
-
-function draw(){
+function draw() {
 
     console.log("called...");
 
-    var dataValues = [x.value, y.value, w.value, h.value, 0, 0, w.value, h.value]; 
-
-    canvas.style.left = parseInt(x.value) - (debugBorder.checked?BORDER_SIZE:0) + "px";
-    canvas.style.top = parseInt(y.value) - (debugBorder.checked?BORDER_SIZE:0) + "px";
-    canvas.style.border = debugBorder.checked ? BORDER_SIZE + "px dotted mediumseagreen" : "none";
-    canvas.width = w.value;
-    canvas.height = h.value;
+    const dataValues = [x.value, y.value, w.value, h.value, 0, 0, w.value, h.value];
+    
+    addStyle(canvas, {
+        left: parseInt(x.value) - (debugBorder.checked?BORDER_SIZE:0) + 'px',
+        top: parseInt(y.value) - (debugBorder.checked?BORDER_SIZE:0) + 'px',
+        border: debugBorder.checked ? BORDER_SIZE + 'px dotted mediumseagreen' : 'none',
+    })
+    setElement(canvas, {
+        width: w.value, 
+        height: h.value,
+    })
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    var imageCanvas = new Image();
+    const imageCanvas = new Image();
 
     imageCanvas.src = image.src;
         
@@ -284,29 +279,59 @@ function draw(){
 
 }
 
-function updateCharData(changed=1){
-    var characterJSON = document.createElement('pre');
-    characterJSON.innerHTML = JSON.stringify(character, undefined, 1)
-                                .replace(/("[a-z].+")/ig,"<b>$1</b>");
-    divJSON.innerHTML = '';
-    divJSON.appendChild(characterJSON);
-    if(changed && localStorage){
-        localStorage.setItem(src, JSON.stringify(character));
-    }
-}
-function updateFrame(){
-    frame.value = parseInt(frame.value) + 1;
-}
-
-
-
 document.addEventListener("DOMContentLoaded", draw);
 
-if(localStorage){
-    if(localStorage.getItem(src)!=null){
-        character = JSON.parse(localStorage.getItem(src));
-        updateCharData(0);
-    }
+imageBody.append(
+    image, 
+    canvas,
+);
+
+divAnimation.append(
+    animation, 
+    direction, 
+    frame,
+);
+
+divSize.append(
+    w, 
+    h,
+);
+
+divPosition.append(
+    x, 
+    y,
+);
+
+divSubmit.append(
+    submitSave, 
+    submitCompare, 
+    submitDelete,
+);
+
+divDebug.append(
+    debugBorder, 
+    debugBorderMessage, 
+    BREAKLINE, 
+    debugIncrement, 
+    debugIncrementMessage
+);
+
+form.append(
+    divAnimation,
+    divSize,
+    divPosition,
+    divSubmit,
+    divDebug,
+    divJSON
+);
+
+document.body.append(
+    imageBody, 
+    form,
+);
+
+if (Object.values(character).length > 0) {
+    divJSON.innerHTML = updateCharData(character, src, 0);
 }
 
 })();
